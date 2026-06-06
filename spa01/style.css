@@ -1,0 +1,27 @@
+body{
+    padding: 20px;   
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; 
+    color: #3a3a3a;
+}
+
+nav {
+    margin-bottom: 20px;
+}
+
+button {
+  background-color: #eeedeb;
+  color: #3a3a3a;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #9e9b94;
+}
+
+#error{
+  color: red;
+}

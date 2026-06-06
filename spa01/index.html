@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SPA Vanilla</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <button id="homeBtn">Home</button>    
+    <button id="formBtn">Form</button>    
+    <button id="newsBtn">News</button>    
+    <button id="profileBtn">Profile</button>    
+  </nav>
+
+  <div id="app"></div>  
+
+
+  <script type="importmap">
+  {
+    "imports": {
+      "axios": "https://esm.sh/axios@1.6.1"
+    }
+  }
+  </script>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
