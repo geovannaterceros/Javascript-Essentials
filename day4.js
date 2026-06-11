@@ -30,3 +30,19 @@ const regexMatch = /(\d+)/; // busca dígitos dentro de la cadena
 const resultadoMatch = texto.match(regexMatch);
 console.log('match():', resultadoMatch);
 // match() devuelve un arreglo con la porción encontrada, por ejemplo ['123']
+
+console.log('--- Fin del ejemplo ---');
+console.log('--- Ejercicio 4 ordenar ascendente y descendente un array ---');
+
+const numeros = [5, 2, 9, 1, 5, 6];
+
+const ordenAscendente = (numeros) => {
+  return numeros.sort((a, b) => a - b);
+};
+
+const ordenDescendente = (numeros) => {
+  return numeros.sort((a, b) => b - a);
+};
+
+console.log('Orden ascendente:', ordenAscendente(numeros));
+console.log('Orden descendente:', ordenDescendente(numeros));
