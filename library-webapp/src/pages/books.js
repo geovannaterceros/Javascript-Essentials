@@ -1,3 +1,5 @@
+import { renderNavbar } from '../components/navbar.js'
+
 export function renderBooks(container) {
   const books = [
     { id: 1, title: 'Don Quijote', author: 'Miguel de Cervantes', year: 1605, rating: 4.5 },
@@ -20,16 +22,7 @@ export function renderBooks(container) {
 
   container.innerHTML = `
     <div class="min-h-screen bg-gray-100">
-      <nav class="bg-blue-900 shadow-lg">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 class="text-white text-2xl font-bold">📚 Library WebApp</h1>
-          <div class="space-x-4">
-            <a href="#home" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Inicio</a>
-            <a href="#books" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Libros</a>
-            <a href="#about" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Acerca de</a>
-          </div>
-        </div>
-      </nav>
+      ${renderNavbar()}
 
       <div class="max-w-6xl mx-auto px-4 py-12">
         <h2 class="text-4xl font-bold text-gray-800 mb-8">Nuestro Catálogo</h2>
