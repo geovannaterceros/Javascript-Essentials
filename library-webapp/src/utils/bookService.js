@@ -16,6 +16,24 @@ export function getBooks() {
   return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
 }
 
+// Buscar libros por titulo, autor o ano
+export function searchBooks(term) {
+  const query = term.trim().toLowerCase()
+  const books = getBooks()
+
+  if (!query) {
+    return books
+  }
+
+  return books.filter(book => {
+    return (
+      book.title.toLowerCase().includes(query) ||
+      book.author.toLowerCase().includes(query) ||
+      String(book.year).includes(query)
+    )
+  })
+}
+
 // Crear un nuevo libro
 export function createBook(book) {
   const books = getBooks()
