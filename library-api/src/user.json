@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "name": "Admin User",
+        "email": "admin@library.com",
+        "password": "admin123",
+        "age": 30,
+        "address": "123 Main St, Anytown, USA",
+        "phone": "555-1234"
+    }
+]
