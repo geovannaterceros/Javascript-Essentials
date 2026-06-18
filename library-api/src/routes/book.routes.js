@@ -5,11 +5,10 @@ import validateBook from '../middlewares/validateBook.middleware.js';
 
 const router = Router();
 
-router.use(authenticate);
 router.get('/', bookController.getBooks);
-router.get('/:id', bookController.getBookById);
-router.post('/', validateBook, bookController.createBook);
-router.put('/:id', validateBook, bookController.updateBook);
-router.delete('/:id', bookController.deleteBook);
+router.get('/:id', authenticate, bookController.getBookById);
+router.post('/', authenticate, validateBook, bookController.createBook);
+router.put('/:id', authenticate, validateBook, bookController.updateBook);
+router.delete('/:id', authenticate, bookController.deleteBook);
 
 export default router;
