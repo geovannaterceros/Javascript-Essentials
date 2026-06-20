@@ -10,10 +10,13 @@ function initBooks() {
   }
 }
 
-// Obtener todos los libros
-export function getBooks() {
-  initBooks()
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+export async function getBooks() {
+  const response = await fetch('http://localhost:3000/books')
+  if (!response.ok) {
+    throw new Error('Error fetching books')
+  }
+ // console.log(response.json());
+  return response.json();
 }
 
 // Buscar libros por titulo, autor o ano

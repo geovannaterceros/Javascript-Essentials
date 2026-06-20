@@ -1,25 +1,40 @@
 import { renderNavbar } from '../components/navbar.js'
-import { createBook, deleteBook, getBooks, searchBooks } from '../utils/bookService.js'
+import { createBook, deleteBook, getBooks, searchBooks, updateBook } from '../utils/bookService.js'
 
-export function renderBooks(container, searchTerm = '') {
-  const books = searchBooks(searchTerm)
-  const totalBooks = getBooks().length
+let editingBookId = null
+export async function renderBooks(container, searchTerm = '') {
+  const books = await getBooks() //searchBooks(searchTerm)
+  const totalBooks = (await getBooks()).length
+
+  console.log('books:', books)
+console.log('tipo:', typeof books)
+console.log('es array:', Array.isArray(books))
 
   const booksHTML = books.map(book => `
-    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-4">
-      <h3 class="text-lg font-bold text-gray-800 mb-2">${book.title}</h3>
-      <p class="text-gray-600 mb-2">Autor: ${book.author}</p>
-      <p class="text-gray-600 mb-2">Ano: ${book.year}</p>
-      <div class="flex items-center mb-4">
-        <span class="text-yellow-500 mr-2">★</span>
-        <span class="text-gray-700 font-semibold">${book.rating}/5</span>
-      </div>
-      <div class="flex gap-2">
-        <button data-edit="${book.id}" class="btn-edit flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded transition">Editar</button>
-        <button data-delete="${book.id}" class="btn-delete flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded transition">Eliminar</button>
-      </div>
-    </div>
-  `).join('')
+<div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-4">
+  <h3 class="text-lg font-bold text-gray-800 mb-2">${book.title}</h3>
+  <p class="text-gray-600 mb-1">Autor: ${book.author}</p>
+  <p class="text-gray-600 mb-1">Categoría: ${book.category}</p>
+  <p class="text-gray-600 mb-1">Idioma: ${book.lenguage}</p>
+  <p class="text-gray-600 mb-1">Año: ${book.year}</p>
+  <p class="text-gray-600 mb-1">Edición: ${book.edition}</p>
+  <p class="text-gray-600 mb-3">${book.description}</p>
+  <div class="font-bold text-green-600 mb-4">${book.currency} ${book.price}</div>
+  <div class="flex gap-2">
+    <button
+      data-edit="${book.id}"
+      class="btn-edit flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded transition">
+      Editar
+    </button>
+
+    <button
+      data-delete="${book.id}"
+      class="btn-delete flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded transition">
+      Eliminar
+    </button>
+  </div>
+</div>
+`).join('')
 
   const emptyStateHTML = `
     <div class="col-span-full bg-white border border-gray-200 rounded-lg p-8 text-center">
@@ -67,38 +82,141 @@ export function renderBooks(container, searchTerm = '') {
 
       <div id="modal-form" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-          <h3 class="text-2xl font-bold text-gray-800 mb-6">Agregar Nuevo Libro</h3>
+          <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6"> Agregar Nuevo Libro </h3>
+<form id="form-add-book" class="space-y-4">
 
-          <form id="form-add-book" class="space-y-4">
-            <div>
-              <label class="block text-gray-700 font-semibold mb-2">Titulo</label>
-              <input type="text" name="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ej: Don Quijote">
-            </div>
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Título
+    </label>
+    <input
+      type="text"
+      name="title"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: Clean Code">
+  </div>
 
-            <div>
-              <label class="block text-gray-700 font-semibold mb-2">Autor</label>
-              <input type="text" name="author" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ej: Miguel de Cervantes">
-            </div>
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Descripción
+    </label>
+    <textarea
+      name="description"
+      required
+      rows="3"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Descripción del libro"></textarea>
+  </div>
 
-            <div>
-              <label class="block text-gray-700 font-semibold mb-2">Ano</label>
-              <input type="number" name="year" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ej: 1605">
-            </div>
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Autor
+    </label>
+    <input
+      type="text"
+      name="author"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: Robert C. Martin">
+  </div>
 
-            <div>
-              <label class="block text-gray-700 font-semibold mb-2">Calificacion (0-5)</label>
-              <input type="number" name="rating" min="0" max="5" step="0.1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ej: 4.5">
-            </div>
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Categoría
+    </label>
+    <input
+      type="text"
+      name="category"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: Software Development">
+  </div>
 
-            <div class="flex gap-4 pt-4">
-              <button type="submit" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">
-                Guardar
-              </button>
-              <button type="button" id="btn-cancel" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition">
-                Cancelar
-              </button>
-            </div>
-          </form>
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Idioma
+    </label>
+    <input
+      type="text"
+      name="lenguage"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: English">
+  </div>
+
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Año
+    </label>
+    <input
+      type="number"
+      name="year"
+      required
+      min="1000"
+      max="2100"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: 2008">
+  </div>
+
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Edición
+    </label>
+    <input
+      type="text"
+      name="edition"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: 1st Edition">
+  </div>
+
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Precio
+    </label>
+    <input
+      type="number"
+      name="price"
+      required
+      min="0"
+      step="0.01"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+      placeholder="Ej: 29.99">
+  </div>
+
+  <div>
+    <label class="block text-gray-700 font-semibold mb-2">
+      Moneda
+    </label>
+    <select
+      name="currency"
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+
+      <option value="">Seleccione</option>
+      <option value="USD">USD</option>
+      <option value="BOB">BOB</option>
+      <option value="EUR">EUR</option>
+    </select>
+  </div>
+
+  <div class="flex gap-4 pt-4">
+    <button
+      type="submit"
+      class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">
+      Guardar
+    </button>
+
+    <button
+      type="button"
+      id="btn-cancel"
+      class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition">
+      Cancelar
+    </button>
+  </div>
+
+</form>
         </div>
       </div>
     </div>
@@ -110,6 +228,9 @@ export function renderBooks(container, searchTerm = '') {
   const formAddBook = document.getElementById('form-add-book')
   const searchInput = document.getElementById('book-search')
   const btnClearSearch = document.getElementById('btn-clear-search')
+  const modalTitle = document.getElementById('modal-title')
+
+  
 
   searchInput.focus()
   searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length)
@@ -144,12 +265,30 @@ export function renderBooks(container, searchTerm = '') {
     const formData = new FormData(formAddBook)
     const newBook = {
       title: formData.get('title').trim(),
+      description: formData.get('description').trim(),
       author: formData.get('author').trim(),
+      category: formData.get('category').trim(),
+      lenguage: formData.get('lenguage').trim(),
       year: parseInt(formData.get('year')),
-      rating: parseFloat(formData.get('rating'))
-    }
+      edition: formData.get('edition').trim(),
+      price: parseFloat(formData.get('price')),
+      currency: formData.get('currency')
+    } 
 
-    createBook(newBook)
+    if (editingBookId) {
+
+       updateBook(
+        editingBookId,
+        newBook
+      )
+      editingBookId = null;
+      modalTitle.textContent = 'Editar Libro'
+
+    } else {
+      modalTitle.textContent = 'Agregar Nuevo Libro'
+      createBook(newBook)
+
+    }
     modal.classList.add('hidden')
     formAddBook.reset()
     renderBooks(container, searchInput.value)
@@ -165,16 +304,30 @@ export function renderBooks(container, searchTerm = '') {
     })
   })
 
-  document.querySelectorAll('.btn-edit').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const bookId = parseInt(e.target.dataset.edit)
-      const book = books.find(b => b.id === bookId)
-      const newTitle = prompt('Nuevo titulo:', book.title)
-      if (newTitle) {
-        alert('Funcionalidad de edicion se integrara con el backend Node.js')
-      }
-    })
+ document.querySelectorAll('.btn-edit').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+
+    const bookId = parseInt(e.target.dataset.edit)
+
+    const book = books.find(
+      b => b.id === bookId
+    )
+
+    editingBookId = bookId
+
+    formAddBook.title.value = book.title
+    formAddBook.description.value = book.description
+    formAddBook.author.value = book.author
+    formAddBook.category.value = book.category
+    formAddBook.lenguage.value = book.lenguage
+    formAddBook.year.value = book.year
+    formAddBook.edition.value = book.edition
+    formAddBook.price.value = book.price
+    formAddBook.currency.value = book.currency
+
+    modal.classList.remove('hidden')
   })
+})
 }
 
 function escapeHtml(value) {
