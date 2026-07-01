@@ -11,8 +11,6 @@ export function renderNavbar() {
         <div class="space-x-4">
           <a href="#home" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Inicio</a>
           <a href="#books" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Libros</a>
-          <a href="#about" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Acerca de</a>
-
           ${
             isAuthenticated()
               ? '<button id="btn-logout" class="text-white hover:bg-blue-700 px-3 py-2 rounded transition">Logout</button>'
@@ -26,8 +24,7 @@ export function renderNavbar() {
 
 export function setupNavbar() {
 
-  const btnLogout =
-    document.getElementById('btn-logout');
+  const btnLogout = document.getElementById('btn-logout');
 
   if (!btnLogout) return;
 

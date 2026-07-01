@@ -65,9 +65,7 @@ export async function updateBook(id, data) {
     return null;
   }
 
-  book.title = data.title;
-  book.author = data.author;
-  book.year = data.year;
+  Object.assign(book, data);
 
   return book;
 }

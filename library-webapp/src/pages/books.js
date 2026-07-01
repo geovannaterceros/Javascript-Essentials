@@ -1,5 +1,5 @@
 import { renderNavbar , setupNavbar } from '../components/navbar.js'
-import { createBook, deleteBook, getBooks, searchBooks, updateBook } from '../utils/bookService.js'
+import { createBook, deleteBook, getBooks, updateBook } from '../utils/bookService.js'
 
 let editingBookId = null
 export async function renderBooks(container, searchTerm = '') {

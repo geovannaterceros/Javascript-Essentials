@@ -1,6 +1,5 @@
 import { renderHome } from './pages/home.js'
 import { renderBooks } from './pages/books.js'
-import { renderAbout } from './pages/about.js'
 import { renderLogin } from './pages/login.js'
 
 export function router(route) {
@@ -10,7 +9,6 @@ export function router(route) {
   const routes = {
     home: renderHome,
     books: renderBooks,
-    about: renderAbout,
     login: renderLogin
   }
 
