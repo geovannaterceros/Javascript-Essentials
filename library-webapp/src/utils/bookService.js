@@ -1,81 +1,143 @@
 import booksData from '../data/books.json' assert { type: 'json' }
+import { getToken } from './authService.js';
 
-const STORAGE_KEY = 'library_books'
+export async function getBooks(search = '') {
 
-// Inicializar con datos por defecto si no hay nada en localStorage
-function initBooks() {
-  const existing = localStorage.getItem(STORAGE_KEY)
-  if (!existing) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(booksData))
+  const token = getToken();
+
+  try {
+
+    const response = await fetch(
+      `http://localhost:3000/books?search=${encodeURIComponent(search)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (handleUnauthorized(response)) {
+      return [];
+    }
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}`);
+    }
+
+    return await response.json();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert('No fue posible conectarse con el servidor.');
+
+    return [];
   }
 }
 
-export async function getBooks() {
-  const response = await fetch('http://localhost:3000/books')
-  if (!response.ok) {
-    throw new Error('Error fetching books')
+export async function createBook(book) {
+
+  const token = getToken();
+
+  const response = await fetch(
+    'http://localhost:3000/books',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(book)
+    }
+  );
+
+  if (handleUnauthorized(response)) {
+      return;
   }
- // console.log(response.json());
-  return response.json();
-}
-
-// Buscar libros por titulo, autor o ano
-export function searchBooks(term) {
-  const query = term.trim().toLowerCase()
-  const books = getBooks()
-
-  if (!query) {
-    return books
+  
+  if(!response.ok) {
+    return { success: false };
   }
 
-  return books.filter(book => {
-    return (
-      book.title.toLowerCase().includes(query) ||
-      book.author.toLowerCase().includes(query) ||
-      String(book.year).includes(query)
-    )
-  })
-}
+  const data = await response.json(); 
 
-// Crear un nuevo libro
-export function createBook(book) {
-  const books = getBooks()
-  const newBook = {
-    id: books.length > 0 ? Math.max(...books.map(b => b.id)) + 1 : 1,
-    ...book
+  return {
+    success: true,
+    data
   }
-  books.push(newBook)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(books))
-  return newBook
 }
 
 // Obtener un libro por ID
+
+export async function updateBook(id, updates) {
+
+  const token = getToken();
+
+  const response = await fetch(
+    `http://localhost:3000/books/${id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updates)
+    }
+  );
+
+  if (handleUnauthorized(response)) {
+      return;
+  }
+
+  if(!response){
+     return { success: false };
+  }
+  const data = await response.json();
+
+  return {
+    success: true,
+    data
+  };
+}
+
 export function getBookById(id) {
   const books = getBooks()
   return books.find(book => book.id === id)
 }
 
-// Actualizar un libro
-export function updateBook(id, updates) {
-  const books = getBooks()
-  const index = books.findIndex(book => book.id === id)
-  if (index !== -1) {
-    books[index] = { ...books[index], ...updates }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(books))
-    return books[index]
+export async function deleteBook(id) {
+
+  const token = getToken();
+
+  const response = await fetch(
+    `http://localhost:3000/books/${id}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  );
+  if (handleUnauthorized(response)) {
+    return { success: false, unauthorized: true };
   }
-  return null
-}
 
-// Eliminar un libro
-export function deleteBook(id) {
-  const books = getBooks()
-  const filtered = books.filter(book => book.id !== id)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
-  return true
-}
+  if (!response.ok) {
+    return { success: false };
+  }
 
-// Resetear a datos originales
-export function resetBooks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(booksData))
+  return { success: true };
+}
+function handleUnauthorized(response) {
+
+  if (response.status === 401 || response.status === 403) {
+
+    alert('Su sesión ha expirado. Debe iniciar sesión.');  
+    location.hash = '#login';
+
+    return true;
+  }
+
+  return false;
 }

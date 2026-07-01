@@ -1,14 +1,11 @@
-import { renderNavbar } from '../components/navbar.js'
+import { renderNavbar , setupNavbar } from '../components/navbar.js'
 import { createBook, deleteBook, getBooks, searchBooks, updateBook } from '../utils/bookService.js'
 
 let editingBookId = null
 export async function renderBooks(container, searchTerm = '') {
-  const books = await getBooks() //searchBooks(searchTerm)
-  const totalBooks = (await getBooks()).length
+    const books = await getBooks(searchTerm);
+    const totalBooks = (await getBooks()).length;
 
-  console.log('books:', books)
-console.log('tipo:', typeof books)
-console.log('es array:', Array.isArray(books))
 
   const booksHTML = books.map(book => `
 <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-4">
@@ -221,6 +218,7 @@ console.log('es array:', Array.isArray(books))
       </div>
     </div>
   `
+  setupNavbar()
 
   const modal = document.getElementById('modal-form')
   const btnAddBook = document.getElementById('btn-add-book')
@@ -231,7 +229,7 @@ console.log('es array:', Array.isArray(books))
   const modalTitle = document.getElementById('modal-title')
 
   
-
+ 
   searchInput.focus()
   searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length)
 
@@ -259,10 +257,11 @@ console.log('es array:', Array.isArray(books))
     }
   })
 
-  formAddBook.addEventListener('submit', (e) => {
+  formAddBook.addEventListener('submit', async(e) => {
     e.preventDefault()
 
     const formData = new FormData(formAddBook)
+
     const newBook = {
       title: formData.get('title').trim(),
       description: formData.get('description').trim(),
@@ -274,34 +273,30 @@ console.log('es array:', Array.isArray(books))
       price: parseFloat(formData.get('price')),
       currency: formData.get('currency')
     } 
+    
+    let result;
 
     if (editingBookId) {
 
-       updateBook(
+       result = await updateBook(
         editingBookId,
         newBook
       )
-      editingBookId = null;
-      modalTitle.textContent = 'Editar Libro'
-
-    } else {
-      modalTitle.textContent = 'Agregar Nuevo Libro'
-      createBook(newBook)
-
+        modalTitle.textContent = 'Editar Libro'
     }
+    else{
+      result = await createBook(newBook)
+      modalTitle.textContent = 'Agregar Nuevo Libro'
+    }
+      
+    editingBookId = null;
     modal.classList.add('hidden')
     formAddBook.reset()
-    renderBooks(container, searchInput.value)
-  })
 
-  document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const bookId = parseInt(e.target.dataset.delete)
-      if (confirm('Estas seguro de que deseas eliminar este libro?')) {
-        deleteBook(bookId)
-        renderBooks(container, searchInput.value)
-      }
-    })
+     if (!result.success) return;
+
+
+    await renderBooks(container, searchInput.value)
   })
 
  document.querySelectorAll('.btn-edit').forEach(btn => {
@@ -328,6 +323,21 @@ console.log('es array:', Array.isArray(books))
     modal.classList.remove('hidden')
   })
 })
+
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    const bookId = parseInt(e.target.dataset.delete);
+
+    if (confirm('¿Estas seguro de que deseas eliminar este libro?')) {
+      const result = await deleteBook(bookId);
+
+      // si no fue exitoso, no recargues libros
+      if (!result.success) return;
+
+      await renderBooks(container, searchInput.value);
+    }
+  });
+});
 }
 
 function escapeHtml(value) {

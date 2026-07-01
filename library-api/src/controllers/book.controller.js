@@ -1,11 +1,19 @@
 import * as bookService from '../services/book.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
+// export const getBooks = asyncHandler(async (req, res) => {
+//   const books = await bookService.getAllBooks();
+//   res.json(books);
+// });
 export const getBooks = asyncHandler(async (req, res) => {
-  const books = await bookService.getAllBooks();
-  res.json(books);
-});
 
+  const search = req.query.search || '';
+
+  const books = await bookService.getAllBooks(search);
+
+  res.json(books);
+
+});
 export const getBookById = asyncHandler(async (req, res) => {
   const book = await bookService.getBookById(req.params.id);
 

@@ -8,8 +8,38 @@ export function resetBooks() {
   nextBookId = books.length + 1;
 }
 
-export async function getAllBooks() {
-  return books;
+export async function getAllBooks(search = '') {
+
+  if (!search) {
+    return books;
+  }
+
+  const searchLower = search.toLowerCase();
+
+  return books.filter(book => {
+
+   // console.log(book);
+
+    console.log({
+      title: book.title,
+      author: book.author,
+      category: book.category,
+      lenguage: book.lenguage,
+      edition: book.edition,
+      description: book.description
+    });
+
+    return (
+      (book.title ?? '').toLowerCase().includes(searchLower) ||
+      (book.author ?? '').toLowerCase().includes(searchLower) ||
+      (book.category ?? '').toLowerCase().includes(searchLower) ||
+      (book.lenguage ?? '').toLowerCase().includes(searchLower) ||
+      (book.edition ?? '').toLowerCase().includes(searchLower) ||
+      (book.description ?? '').toLowerCase().includes(searchLower) ||
+      String(book.year ?? '').includes(searchLower)
+    );
+  });
+
 }
 
 export async function getBookById(id) {
